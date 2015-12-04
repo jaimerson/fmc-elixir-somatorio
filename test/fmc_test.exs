@@ -2,7 +2,6 @@ defmodule FMCTest do
   use ExUnit.Case
   use ExCheck
 
-
   property "caso base" do
     for_all x in int do
       FMC.somatorio(x, x, &(&1)) == x
@@ -46,12 +45,31 @@ defmodule FMCTest do
   end
 
   property "combinação de somatórios" do
-    for_all {s, t, j} in {int, int, int} do
+    for_all {s, t, j} in such_that({x, _, z} in {int, int, int} when(x < z)) do
       implies s < j and j < t do
         first_part = FMC.somatorio(s, j, &(&1))
         second_part = FMC.somatorio(j + 1, t, &(&1))
         whole = FMC.somatorio(s, t, &(&1))
         whole == first_part + second_part
+      end
+    end
+  end
+
+  property "complemento de somatórios" do
+    for_all {s, t} in such_that({x, y} in {pos_integer, pos_integer} when x < y) do
+      from_s_to_t = FMC.somatorio(s, t, &(&1))
+      from_0_to_t = FMC.somatorio(0, t, &(&1))
+      from_0_to_s_minus_one = FMC.somatorio(0, s - 1, &(&1))
+      from_s_to_t == from_0_to_t - from_0_to_s_minus_one
+    end
+  end
+
+  property "progressão aritmética" do
+    for_all {s, t} in {pos_integer, pos_integer} do
+      implies s < t do
+        sum = FMC.somatorio(s, t, &(&1))
+        progression = div(t*t + t, 2) - div(s*s - s, 2)
+        sum == progression
       end
     end
   end
