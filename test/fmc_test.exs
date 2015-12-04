@@ -73,4 +73,12 @@ defmodule FMCTest do
       end
     end
   end
+
+  property "somatório de 2^k = 2^n -1" do
+    for_all {s} in {pos_integer} do
+      sum = FMC.somatorio(s - 1, fn n -> :math.pow(2, n) end)
+      function = :math.pow(2, s) - 1
+      sum == function
+    end
+  end
 end
